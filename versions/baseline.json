@@ -1,5 +1,9 @@
 {
   "default": {
+    "qvac-lib-inference-addon-cpp": {
+      "baseline": "0.1.0",
+      "port-version": 0
+    },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",
       "port-version": 0
