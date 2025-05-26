@@ -1,7 +1,7 @@
 vcpkg_from_git(
   OUT_SOURCE_PATH SOURCE_PATH
   URL git@github.com:tetherto/qvac-lib-inference-addon-cpp.git
-  REF e746d2dcf402d9a2321c80e7d67f19eb4d4babeb
+  REF 16b9461310625278be375e7c8053e0dc25776359
 )
 
 vcpkg_cmake_configure(
