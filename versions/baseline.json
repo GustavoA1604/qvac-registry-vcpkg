@@ -33,7 +33,7 @@
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
-      "baseline": "0.2.0",
+      "baseline": "0.4.0",
       "port-version": 0
     },
     "vcpkg-cmake": {
