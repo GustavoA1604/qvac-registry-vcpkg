@@ -6,7 +6,9 @@ vcpkg_from_github(
   REF ${VERSION}
   SHA512 aea24debb836131d14d362ff78c6d12cfe2e82188340e69e71e6874a1fa51fa9405f2c03fe43888b1ff4183f4288bf64f07dd1106224b0108c3e0f844989a409
   HEAD_REF master
-  PATCHES 0001-fix-vcpkg-build.patch
+  PATCHES 
+      0001-fix-vcpkg-build.patch
+      0002-fix-apple-silicon-cross-compile.patch
 )
 
 set(PLATFORM_OPTIONS)
@@ -26,6 +28,7 @@ vcpkg_cmake_configure(
     -DWHISPER_BUILD_EXAMPLES=OFF
     -DWHISPER_BUILD_SERVER=OFF
     -DBUILD_SHARED_LIBS=OFF
+    -DGGML_BUILD_NUMBER=1
     ${PLATFORM_OPTIONS}
 )
 

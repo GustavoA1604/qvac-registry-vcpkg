@@ -48,6 +48,10 @@
       "baseline": "0.6.1",
       "port-version": 0
     },
+    "sentencepiece": {
+      "baseline": "0.2.0",
+      "port-version": 2
+    },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",
       "port-version": 0
