@@ -1,0 +1,18 @@
+diff --git a/ggml/cmake/ggml-config.cmake.in b/ggml/cmake/ggml-config.cmake.in
+index 8c2dc31c..4e1c7d83 100644
+--- a/ggml/cmake/ggml-config.cmake.in
++++ b/ggml/cmake/ggml-config.cmake.in
+@@ -87,6 +87,13 @@ if (NOT GGML_SHARED_LIB)
+             list(APPEND GGML_SYCL_INTERFACE_LINK_LIBRARIES IntelSYCL::SYCL_CXX MKL::MKL MKL::MKL_SYCL)
+         endif()
+     endif()
++
++    if (GGML_OPENCL)
++        find_package(PkgConfig REQUIRED)
++        pkg_check_modules(OpenCL REQUIRED IMPORTED_TARGET OpenCL)
++        list(APPEND GGML_OPENCL_INTERFACE_LINK_LIBRARIES PkgConfig::OpenCL)
++    endif()
++
+ endif()
+ 
+ set(_ggml_all_targets "")

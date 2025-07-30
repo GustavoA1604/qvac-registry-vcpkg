@@ -1,16 +1,15 @@
-set(VERSION "73e53dc834c0a2336cd104473af6897197b96277")
-
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-llama.cpp
-  REF ${VERSION}
-  SHA512 1819ddf08eec83bf137ee0ab5ab0ff3324e9cfcd01f97105c86f0116798db97f927873a843f2a1c73a6b732afe2cfce7d65aba35d556c38ec7f9846c12057840
+  REF b${VERSION}
+  SHA512 32c0a06b6b4f2901af72ca37a1ca2ec3747e2f906f83c8cba7e45c91cc100e63513256f5519a674f690da3e80c0e5a9abc93a910ae3c5ffd08271e1978c0be2a
   HEAD_REF master
   PATCHES
     "0001-fix-vcpkg-build.patch"
     "0002-install-common-lib.patch"
     "0003-cpp-wrappers-vulkan.patch"
     "0004-patch-vulkan-compat.patch"
+    "0005-pass-opencl-dep.patch"
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
@@ -49,7 +48,8 @@ endif()
 if (VCPKG_TARGET_IS_ANDROID)
   list(APPEND PLATFORM_OPTIONS
     -DGGML_VULKAN_DISABLE_COOPMAT=ON
-    -DGGML_VULKAN_DISABLE_COOPMAT2=ON)
+    -DGGML_VULKAN_DISABLE_COOPMAT2=ON
+    -DGGML_OPENCL=ON)
 endif()
 
 vcpkg_cmake_configure(
