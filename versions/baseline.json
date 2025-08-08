@@ -50,7 +50,7 @@
     },
     "qvac-lint-cpp": {
       "baseline": "1.0.1",
-      "port-version": 0
+      "port-version": 1
     },
     "sentencepiece": {
       "baseline": "0.2.0",

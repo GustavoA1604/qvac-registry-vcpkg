@@ -1,8 +1,8 @@
 set(QVAC_LINT_CPP "git@github.com:tetherto/qvac-lint-cpp.git")
 
-find_package(Git REQUIRED)
+vcpkg_find_acquire_program(GIT)
 execute_process(
-  COMMAND ${GIT_EXECUTABLE} ls-remote --tags --refs --sort=-v:refname "${QVAC_LINT_CPP}"
+  COMMAND ${GIT} ls-remote --tags --refs --sort=-v:refname "${QVAC_LINT_CPP}"
   OUTPUT_VARIABLE remote_tags
   OUTPUT_STRIP_TRAILING_WHITESPACE
   COMMAND_ERROR_IS_FATAL ANY)
