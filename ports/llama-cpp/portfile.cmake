@@ -47,6 +47,7 @@ endif()
 
 vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
+  DISABLE_PARALLEL_CONFIGURE
   OPTIONS
     -DGGML_CCACHE=OFF
     -DGGML_OPENMP=OFF
