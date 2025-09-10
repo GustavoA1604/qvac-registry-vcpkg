@@ -9,6 +9,7 @@ vcpkg_from_github(
     "03-fix-dll.patch"
     "04-fix-android-binary-size.patch"
     "05-add-dependencies-to-config.patch"
+    "06-fix-array-bounds-issue-ios-sim.patch"
 )
 
 vcpkg_check_features(
