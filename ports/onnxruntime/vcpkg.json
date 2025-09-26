@@ -84,15 +84,15 @@
       "description": "Build with CoreML EP",
       "supports": "osx | ios"
     },
-    "nnapi-ep": {
-      "description": "Build with Android NNAPI EP",
-      "supports": "android"
-    },
     "dml-ep": {
       "description": "Build with CoreML EP",
       "dependencies": [
         "directx-headers"
       ]
+    },
+    "nnapi-ep": {
+      "description": "Build with Android NNAPI EP",
+      "supports": "android"
     },
     "tests": {
       "description": "Build ONNXRuntime unit tests",
