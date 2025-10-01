@@ -1,6 +1,7 @@
 {
   "name": "qvac-lib-inference-addon-cpp",
   "version": "0.11.2",
+  "port-version": 1,
   "dependencies": [
     {
       "name": "qvac-lint-cpp",
