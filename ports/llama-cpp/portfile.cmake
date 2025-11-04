@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-llama.cpp
   REF v${VERSION}
-  SHA512 650a56d359df5ca95bfeff09dcb540cc5fa9385b73d0a7eb03a7ed6f2214c62ccc18f4209001ddc0f930ce8b1aba05639dc776930a3d339a82218a772bb94399
+  SHA512 b30547113c399371e95d420ae55d90a2984f2f3448f61309a1dcb3c8fe1f1c86921c6d41ef7765a4a2044e7999f14af05e4e93b2f6e382245c7d28a19d2c4e01
 )
 
 vcpkg_check_features(
@@ -81,6 +81,8 @@ vcpkg_fixup_pkgconfig()
 file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
 file(RENAME "${CURRENT_PACKAGES_DIR}/bin/convert_hf_to_gguf.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/convert-hf-to-gguf.py")
 file(INSTALL "${SOURCE_PATH}/gguf-py" DESTINATION "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
+file(RENAME "${CURRENT_PACKAGES_DIR}/bin/vulkan_profiling_analyzer.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/vulkan_profiling_analyzer.py")
+
 if (NOT VCPKG_BUILD_TYPE)
   file(REMOVE "${CURRENT_PACKAGES_DIR}/debug/bin/convert_hf_to_gguf.py")
 endif()
