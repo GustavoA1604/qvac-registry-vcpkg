@@ -17,7 +17,7 @@ vcpkg_cmake_install()
 
 vcpkg_cmake_config_fixup(
     PACKAGE_NAME tokenizers_cpp
-    CONFIG_PATH lib/cmake
+    CONFIG_PATH lib/cmake/tokenizers_cpp
 )
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")

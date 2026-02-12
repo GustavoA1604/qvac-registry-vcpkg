@@ -1,7 +1,7 @@
 {
   "name": "tokenizers-cpp",
   "version": "0.1.1",
-  "port-version": 1,
+  "port-version": 2,
   "description": "Provides a cross-platform C++ tokenizer binding library that can be universally deployed. It wraps and binds the HuggingFace tokenizers library and sentencepiece and provides a minimum common interface in C++.",
   "homepage": "https://github.com/mlc-ai/tokenizers-cpp",
   "license": "Apache-2.0",

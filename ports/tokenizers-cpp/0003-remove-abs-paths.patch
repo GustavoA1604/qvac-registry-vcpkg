@@ -1,28 +1,67 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b806c58..582175a 100644
+index b806c58..0073d84 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -106,6 +106,14 @@ if(MSVC)
+@@ -102,10 +102,11 @@ if (MLC_ENABLE_RWKV_WORLD_TOKENIZER STREQUAL "ON")
+ endif ()
+ 
+ if(MSVC)
+-  set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/tokenizers_c.lib")
++  set(TOKENIZERS_RUST_LIB_FILENAME "tokenizers_c.lib")
  else()
-   set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/libtokenizers_c.a")
+-  set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/libtokenizers_c.a")
++  set(TOKENIZERS_RUST_LIB_FILENAME "libtokenizers_c.a")
  endif()
-+add_library(tokenizers-rust STATIC IMPORTED)
-+set_target_properties(
-+  tokenizers-rust
-+  PROPERTIES
-+    IMPORTED_LOCATION "${TOKENIZERS_RUST_LIB}"
-+    INTERFACE_LINK_LIBRARIES ""
-+)
-+
++set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/${TOKENIZERS_RUST_LIB_FILENAME}")
  set(TOKENIZERS_CPP_INCLUDE ${TOKENIZERS_CPP_ROOT}/include)
  
  # Find cargo executable
-@@ -193,7 +201,7 @@ if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
+@@ -193,7 +194,12 @@ if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
  endif ()
  
  add_library(tokenizers_c INTERFACE ${TOKENIZERS_RUST_LIB})
 -target_link_libraries(tokenizers_c INTERFACE ${TOKENIZERS_RUST_LIB} ${TOKENIZERS_C_LINK_LIBS})
-+target_link_libraries(tokenizers_c INTERFACE tokenizers-rust ${TOKENIZERS_C_LINK_LIBS})
++# Use BUILD_INTERFACE for build tree and INSTALL_INTERFACE for relocatable install (e.g. vcpkg)
++target_link_libraries(tokenizers_c INTERFACE
++  $<BUILD_INTERFACE:${TOKENIZERS_RUST_LIB}>
++  $<INSTALL_INTERFACE:lib/${TOKENIZERS_RUST_LIB_FILENAME}>
++  ${TOKENIZERS_C_LINK_LIBS}
++)
  
  target_link_libraries(tokenizers_cpp PRIVATE tokenizers_c ${TOKENIZERS_CPP_LINK_LIBS})
  if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
+@@ -218,9 +224,21 @@ install(DIRECTORY ${TOKENIZERS_CPP_INCLUDE}/
+   DESTINATION include
+ )
+ 
++# Config snippet to fix tokenizers_c INTERFACE_LINK_LIBRARIES so the Rust lib
++# path resolves via _IMPORT_PREFIX (avoids -llib/libtokenizers_c.a and works with vcpkg)
++list(JOIN TOKENIZERS_C_LINK_LIBS ";" TOKENIZERS_C_LINK_LIBS_STR)
++configure_file(
++  ${TOKENIZERS_CPP_ROOT}/cmake/tokenizers_cpp-config-tokenizers_c-link.cmake.in
++  ${CMAKE_CURRENT_BINARY_DIR}/tokenizers_cpp-config-tokenizers_c-link.cmake
++  @ONLY
++)
++
+ # Export the targets for find_package support
+ install(EXPORT tokenizers_cpp_targets
+   FILE tokenizers_cpp-config.cmake
+   NAMESPACE tokenizers::
+   DESTINATION lib/cmake/tokenizers_cpp
+ )
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tokenizers_cpp-config-tokenizers_c-link.cmake
++  DESTINATION lib/cmake/tokenizers_cpp
++)
+diff --git a/cmake/tokenizers_cpp-config-tokenizers_c-link.cmake.in b/cmake/tokenizers_cpp-config-tokenizers_c-link.cmake.in
+new file mode 100644
+index 0000000..322824d
+--- /dev/null
++++ b/cmake/tokenizers_cpp-config-tokenizers_c-link.cmake.in
+@@ -0,0 +1,7 @@
++# Resolve tokenizers_c link to installed Rust library using relocatable path.
++# (The export writes a relative path which the linker treats as -l, causing -llib/...)
++if(TARGET tokenizers::tokenizers_c)
++  set_target_properties(tokenizers::tokenizers_c PROPERTIES
++    INTERFACE_LINK_LIBRARIES "${_IMPORT_PREFIX}/lib/@TOKENIZERS_RUST_LIB_FILENAME@;@TOKENIZERS_C_LINK_LIBS_STR@"
++  )
++endif()
