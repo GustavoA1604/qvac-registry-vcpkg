@@ -12,10 +12,6 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
-    "espeak-ng": {
-      "baseline": "1.52.0",
-      "port-version": 2
-    },
     "llama-cpp": {
       "baseline": "7248.1.2",
       "port-version": 0
@@ -35,14 +31,6 @@
     "opencl-headers": {
       "baseline": "2024.10.24",
       "port-version": 0
-    },
-    "piper": {
-      "baseline": "1.2.0",
-      "port-version": 2
-    },
-    "piper-phonemize": {
-      "baseline": "1.2.0",
-      "port-version": 1
     },
     "protobuf": {
       "baseline": "onnxruntime",
