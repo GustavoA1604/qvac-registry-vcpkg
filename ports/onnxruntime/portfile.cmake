@@ -25,6 +25,7 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL
     "07-fix-coreml-export.patch"
     "08-fix-coreml-proto-include.patch"
     "13-fix-coreml-availability.patch"
+    "18-fix-coreml-external-data-path.patch"
   )
 endif()
 
