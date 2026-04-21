@@ -1,0 +1,41 @@
+{
+  "name": "tts-cpp",
+  "version-date": "2026-04-21",
+  "description": "QVAC TTS engine: text-to-speech inference in pure C/C++ via ggml (currently ships Chatterbox Turbo)",
+  "homepage": "https://github.com/GustavoA1604/chatterbox.cpp",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "default-features": [
+    {
+      "name": "metal",
+      "platform": "osx | ios"
+    },
+    {
+      "name": "vulkan",
+      "platform": "windows | linux | android"
+    }
+  ],
+  "features": {
+    "metal": {
+      "description": "Enable Metal GPU acceleration (macOS/iOS)"
+    },
+    "vulkan": {
+      "description": "Enable Vulkan GPU acceleration",
+      "dependencies": [
+        {
+          "name": "vulkan",
+          "platform": "!osx & !ios"
+        }
+      ]
+    }
+  }
+}

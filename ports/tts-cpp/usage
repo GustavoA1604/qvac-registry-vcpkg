@@ -1,0 +1,13 @@
+The package tts-cpp provides CMake integration:
+
+  find_package(qvac-tts-cpp CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE qvac-tts::qvac-tts)
+
+The following public headers are available:
+  #include <qvac-tts/qvac-tts.h>                       // generic CLI entry point
+  #include <qvac-tts/chatterbox/s3gen_pipeline.h>      // Chatterbox S3Gen + HiFT back-half
+
+GPU backends are controlled by vcpkg features (ggml is vendored and
+installed alongside qvac-tts):
+  metal  - Metal GPU backend  (default-on for macOS/iOS)
+  vulkan - Vulkan GPU backend (default-on for windows/linux/android)
