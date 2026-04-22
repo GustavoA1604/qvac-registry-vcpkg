@@ -2,8 +2,10 @@
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
 # Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied.  Pinned to the commit used by stable-diffusion.cpp tag
-# master-514-5792c66.
+# pre-applied.  Currently pinned to the `tts` branch of the
+# GustavoA1604 fork while in dev; the branch carries the Metal
+# chatterbox ops patch on top of the same commit used by
+# stable-diffusion.cpp tag master-514-5792c66.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -18,10 +20,10 @@
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO tetherto/qvac-ext-ggml
-    REF e16bdae279d575432337cf8cf375977812fdba9d
-    SHA512 09fa1cd58bdaf0cf77803ef723d15ef98ca4fa529e24d66bd9a9bbff09c34c9ff63a27bb8256d71d2961ee797473f72984a9f942606f3dac9d04b50b4ea11763
-    HEAD_REF 2026-01-30
+    REPO GustavoA1604/qvac-ext-ggml
+    REF 54494616b0f1fad39fe6064c595420a16e597a46
+    SHA512 1c2572f2fa57382a1059e56862ae76e1676aace260170b09da99da63ecda82374000e1e31f3aeee3aa24d81a0b7b279c73fe9c6826c86244f364c92930710e3d
+    HEAD_REF tts
 )
 
 # --- GPU feature flags ---

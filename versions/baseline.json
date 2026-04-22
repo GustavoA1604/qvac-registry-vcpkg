@@ -18,7 +18,7 @@
     },
     "ggml": {
       "baseline": "2026-01-30",
-      "port-version": 6
+      "port-version": 7
     },
     "intgemm": {
       "baseline": "1.0.0",

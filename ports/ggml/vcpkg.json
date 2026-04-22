@@ -1,8 +1,8 @@
 {
   "name": "ggml",
   "version-date": "2026-01-30",
-  "port-version": 6,
-  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied, pinned to commit used by stable-diffusion.cpp master-514-5792c66)",
+  "port-version": 7,
+  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied, pinned to commit used by stable-diffusion.cpp master-514-5792c66; tts branch adds Metal chatterbox ops: diag_mask_inf, pad_ext lp0..lp3, conv_transpose_1d simd_sum rewrite, mul_mv Q-variant bias/residual fusion)",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml",
   "license": "MIT",
   "dependencies": [
