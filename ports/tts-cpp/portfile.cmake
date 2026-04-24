@@ -1,19 +1,22 @@
 # tts-cpp vcpkg overlay port
 #
-# Builds the QVAC TTS static library (target `qvac-tts::qvac-tts`).
+# Builds the tts-cpp static library (target `tts-cpp::tts-cpp`).
 # The library currently ships the Chatterbox Turbo pipeline; additional
 # TTS engines will land under the same umbrella.
 #
 # ggml is consumed from the separate ggml overlay port via
 # `find_package(ggml CONFIG REQUIRED)`, gated by the
-# QVAC_TTS_USE_SYSTEM_GGML option in the upstream CMakeLists (mirrors
+# TTS_CPP_USE_SYSTEM_GGML option in the upstream CMakeLists (mirrors
 # stable-diffusion-cpp's SD_USE_SYSTEM_GGML pattern).
 #
 # Installed artefacts:
-#   include/qvac-tts/qvac-tts.h                        (generic CLI entry)
-#   include/qvac-tts/chatterbox/s3gen_pipeline.h       (Chatterbox back-half)
-#   lib/libqvac-tts.a                                  (static library)
-#   share/qvac-tts-cpp/qvac-tts-cppConfig.cmake        (CMake package config)
+#   include/tts-cpp/tts-cpp.h                           (generic CLI entry)
+#   include/tts-cpp/chatterbox/engine.h                 (Engine API)
+#   include/tts-cpp/chatterbox/s3gen_pipeline.h         (Chatterbox back-half)
+#   lib/libtts-cpp.a                                    (static library)
+#   share/tts-cpp/tts-cppConfig.cmake                   (CMake package config)
+#   share/tts-cpp/tts-cppTargets.cmake                  (exported target)
+#   share/tts-cpp/tts-cppConfigVersion.cmake            (semver companion)
 #
 # GPU backend selection is handled by the ggml port via vcpkg features
 # (metal / vulkan / cuda / opencl), forwarded through this port's own
@@ -23,14 +26,14 @@
 #
 # The port currently pins to GustavoA1604/chatterbox.cpp on the
 # `vcpkg-registry-2` branch while the fork stabilises.  Once the repo is
-# transferred to the tetherto org under its final name (qvac-tts.cpp),
+# transferred to the tetherto org under its final name (tts-cpp),
 # bump REF + REPO + HEAD_REF in a single port-version.
 
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO GustavoA1604/chatterbox.cpp
-  REF 4ff99184432e2b9305728b2c455defb5d3c0a37d
-  SHA512 0de8caef4ce190c57beae56ceec03c0a26537012889cc7ad2d42cfe9a81262d7ad6a350d9572a86b55077ca2e217a0cb0ea71b2604a5576ab6f9f850b14eb23c
+  REF f8f9145dc5e219e4a2be8c772b9c5990599d8667
+  SHA512 e2378a5443cd11f64ebdc79569d70de9af6799bab8d7fca7625287304f2dd997163e1a32a49196e3c262ea060cc345bedd7d756f0f1ff5d280a903dde4b6edbf
   HEAD_REF vcpkg-registry-2
 )
 
@@ -52,15 +55,17 @@ vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
   DISABLE_PARALLEL_CONFIGURE
   OPTIONS
-    -DQVAC_TTS_BUILD_LIBRARY=ON
-    -DQVAC_TTS_BUILD_EXECUTABLES=OFF
-    -DQVAC_TTS_BUILD_TESTS=OFF
-    -DQVAC_TTS_INSTALL=ON
-    -DQVAC_TTS_USE_SYSTEM_GGML=ON
+    -DTTS_CPP_BUILD_LIBRARY=ON
+    -DTTS_CPP_BUILD_EXECUTABLES=OFF
+    -DTTS_CPP_BUILD_TESTS=OFF
+    -DTTS_CPP_INSTALL=ON
+    -DTTS_CPP_USE_SYSTEM_GGML=ON
     ${PLATFORM_OPTIONS}
 )
 
 vcpkg_cmake_install()
+
+vcpkg_cmake_config_fixup(PACKAGE_NAME tts-cpp CONFIG_PATH share/tts-cpp)
 
 vcpkg_copy_pdbs()
 
