@@ -1,7 +1,6 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-04-21",
-  "port-version": 1,
+  "version-date": "2026-04-24",
   "description": "QVAC TTS engine: text-to-speech inference in pure C/C++ via ggml (currently ships Chatterbox Turbo)",
   "homepage": "https://github.com/GustavoA1604/chatterbox.cpp",
   "license": "MIT",
