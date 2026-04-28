@@ -48,6 +48,10 @@
       "baseline": "2024.10.24",
       "port-version": 0
     },
+    "parakeet-cpp": {
+      "baseline": "2026-04-28",
+      "port-version": 0
+    },
     "protobuf": {
       "baseline": "onnxruntime",
       "port-version": 0
