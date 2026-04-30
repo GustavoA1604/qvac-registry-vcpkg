@@ -40,8 +40,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO GustavoA1604/qvac-parakeet.cpp
-    REF 4fcea2b00d3d978db5320ebaa082b9d3602d1ec9
-    SHA512 f5ff71d74f7eb98c3152b2d996ca4b5f66b5cfddc7887a5bed107df73cd6f21ebd86ada226fc812ce5afe75029107fc38967f79b9bddaa4dd05834f402412b57
+    REF 285baeebedcff93a910002174faedb1b5ff7e5ec
+    SHA512 2aca932fdf1150c6b59bf7ebb7fd0b9e215facd05869132efb3c2fb9565bfcb6efbefe88490e7f20a4d41a26a93c606e9f2cffc3417c0c4d979f494237fd3809
     HEAD_REF main
 )
 

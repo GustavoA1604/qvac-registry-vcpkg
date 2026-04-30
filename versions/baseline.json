@@ -50,7 +50,7 @@
     },
     "parakeet-cpp": {
       "baseline": "2026-04-30",
-      "port-version": 7
+      "port-version": 8
     },
     "protobuf": {
       "baseline": "onnxruntime",
