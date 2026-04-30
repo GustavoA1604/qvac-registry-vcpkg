@@ -40,8 +40,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO GustavoA1604/qvac-parakeet.cpp
-    REF 3ff4bd9117829a44fd3a086d907e67aec0e7195b
-    SHA512 11e73204d5baa3acdd8c7f77de8b4419e40907d82d3aa013ebed57c9f917c52c1cde02b001c05c9a002592b5a4238554874a012752e6ad89af63e2a537c1bb43
+    REF b7c45722264a03f4f7a5f61ae7ce714b6019bc57
+    SHA512 1b75108c94509f2a8208bf970cb724e9cb871811725d0affb2fbdfca892b7122fdcabe9a5993f850c09505d745e00981ed156e45c7ba8e68930a19b6c69ec5e2
     HEAD_REF main
 )
 
@@ -49,12 +49,21 @@ vcpkg_from_github(
 # CMakeLists picks it up via add_subdirectory(ggml) in the
 # QVAC_PARAKEET_USE_SYSTEM_GGML=OFF (default) branch. The `parakeet`
 # branch on GustavoA1604/qvac-ext-ggml is upstream ggml at the pinned
-# commit, with no chatterbox patches.
+# commit (58c38058) plus two ggml-opencl patches landed as commits
+# (QVAC-17997):
+#   1. opencl: relax Adreno/Intel device whitelist behind
+#      GGML_OPENCL_ALLOW_UNKNOWN_GPU (no-op on Adreno production builds).
+#   2. opencl: persistent kernel binary cache via
+#      clCreateProgramWithBinary; activates the GGML_OPENCL_CACHE_DIR
+#      contract the LLM addon already plumbs.
+# Carries no chatterbox metal-ops patch (lives on the qvac-ext-ggml
+# `speech` branch which would break parakeet's EOU q8_0 joint-network
+# matmul -- see the bundled-ggml rationale above).
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SRC
     REPO GustavoA1604/qvac-ext-ggml
-    REF 58c3805840b516b2a88ff867ccf7bb41dba79951
-    SHA512 9875fa38805d0b60f8867a9b6d886f01afc90927d5d4ae941a4c09f145ff2ef0f1d3078608ed277f8b5fd4ac3eb3b658c6966ece94409ff567a4e7bd9d721f1a
+    REF 8bca30a34ba06e62fe5406dc122e49d3db0eba3a
+    SHA512 624ba10829dc8b19a785728903b34ded184b715b6182ba936461acb15744ce901e2b8af48356d42b7ec6b823b227f45ecb5810589794528bd4cfe056a57e9faf
     HEAD_REF parakeet
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
@@ -105,6 +114,12 @@ vcpkg_cmake_configure(
         -DGGML_NATIVE=ON
         -DGGML_OPENMP=OFF
         -DGGML_CCACHE=OFF
+        # Disable qvac-parakeet's own ccache launcher in vcpkg builds so
+        # CI runs are deterministic regardless of whether ccache is on
+        # the build image. ggml's own GGML_CCACHE=OFF is already set
+        # above; both are needed since the parakeet ccache helper is
+        # scoped to parakeet targets only and doesn't read GGML_CCACHE.
+        -DQVAC_PARAKEET_CCACHE=OFF
         -DGGML_BUILD_NUMBER=1
         -DGGML_METAL=${GGML_METAL}
         -DGGML_VULKAN=${GGML_VULKAN}
