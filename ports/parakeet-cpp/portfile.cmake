@@ -100,6 +100,18 @@ vcpkg_cmake_configure(
         -DQVAC_PARAKEET_INSTALL=ON
         -DQVAC_PARAKEET_USE_SYSTEM_GGML=OFF
         -DBUILD_SHARED_LIBS=OFF
+        # Disable parakeet.cpp's libqvac-parakeet-ggml-* output prefix in
+        # the vcpkg flow. The prefix is meant to avoid shared-library
+        # filename collisions when multiple addons load different ggml
+        # versions in the same process; it's a no-op for shared linkage
+        # and actively breaks static-link installs because the upstream
+        # ggml-config.cmake exported here does
+        # `find_library(GGML_LIBRARY ggml ...)` which only matches
+        # `libggml*` filenames. Since this port hard-pins
+        # BUILD_SHARED_LIBS=OFF (everything statically links into the
+        # consuming addon's single shared object), the prefix has no
+        # collision benefit here.
+        -DQVAC_PARAKEET_GGML_LIB_PREFIX=OFF
         # GGML_NATIVE=ON intentionally. EOU q8_0's greedy RNN-T decode
         # is more f32-precision-sensitive than CTC / TDT (24-step argmax
         # over 1027 classes; one bad-precision step flips argmax and
