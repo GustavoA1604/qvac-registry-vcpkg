@@ -254,18 +254,17 @@ vcpkg_cmake_configure(
         # consuming addon's single shared object), the prefix has no
         # collision benefit here.
         -DQVAC_PARAKEET_GGML_LIB_PREFIX=OFF
-        # GGML_NATIVE=ON intentionally. EOU q8_0's greedy RNN-T decode
-        # is more f32-precision-sensitive than CTC / TDT (24-step argmax
-        # over 1027 classes; one bad-precision step flips argmax and
-        # skips a token). Building with NATIVE=OFF on Apple Silicon
-        # produces visibly degraded EOU transcripts ("and so my fellow
-        # ask not your country..." vs the correct "and so my fellow
-        # americans ask not what your country..."); CTC and TDT keep
-        # working byte-equal because their decode is more robust. ggml
-        # runtime-detects CPU features on x86 / Linux so prebuilt
-        # binaries stay portable across CPU revisions; on Apple Silicon
-        # prebuilds are per-arch anyway.
-        -DGGML_NATIVE=ON
+        # GGML_NATIVE=OFF on every triplet, matching qvac-fabric's port.
+        # NATIVE=ON makes ggml-cpu probe the build host's CPU at configure
+        # time (-march=native on GCC/Clang, FindSIMD.cmake -> /arch:AVX512
+        # etc. on MSVC) and bake those instructions into the binary. On
+        # heterogeneous CI fleets (e.g. Azure `windows-2022` / Linux
+        # hosted runners where the prebuild VM has AVX-512 but the
+        # integration-test VM does not) the resulting prebuild SIGILLs
+        # on first ggml call. Pinning to a portable baseline keeps the
+        # prebuilt artefacts loadable across the whole fleet, exactly
+        # the same trade-off `qvac-fabric` / `llama-cpp` already make.
+        -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
         -DGGML_CCACHE=OFF
         # Disable qvac-parakeet's own ccache launcher in vcpkg builds so
