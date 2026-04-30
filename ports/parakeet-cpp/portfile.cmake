@@ -89,6 +89,66 @@ if("opencl" IN_LIST FEATURES)
     set(GGML_OPENCL ON)
 endif()
 
+# ggml-vulkan's CMakeLists does `find_package(Vulkan COMPONENTS glslc REQUIRED)`.
+# The Android NDK ships glslc at $NDK/shader-tools/<host>/glslc, but CMake's
+# FindVulkan.cmake doesn't probe that path -- it only looks under $VULKAN_SDK
+# and the system PATH. On a fresh macOS host with no Vulkan SDK installed but
+# the Android command-line tools present, the NDK's own glslc is available
+# (and is in fact the right shader compiler to pair with the NDK's vulkan
+# headers / libvulkan.so), so we point CMake at it explicitly instead of
+# requiring every contributor to install the LunarG SDK.
+#
+# Resolution order:
+#   1. $ENV{ANDROID_NDK_HOME}, $ENV{ANDROID_NDK}, $ENV{ANDROID_NDK_ROOT}
+#      (whichever is set; standard NDK env vars).
+#   2. $ENV{ANDROID_HOME}/ndk/<latest>  (homebrew default on macOS;
+#      `brew install --cask android-commandlinetools` puts the NDK here).
+# The NDK ships only an x86_64 host build (which runs under Rosetta on
+# Apple Silicon), so the host triple under shader-tools/ is normally
+# `darwin-x86_64` / `linux-x86_64` / `windows-x86_64`. We glob the
+# directory rather than hard-coding the triple.
+if (VCPKG_TARGET_IS_ANDROID AND GGML_VULKAN)
+    set(_pp_ndk_root "")
+    foreach(_pp_var ANDROID_NDK_HOME ANDROID_NDK ANDROID_NDK_ROOT)
+        if (DEFINED ENV{${_pp_var}} AND NOT "$ENV{${_pp_var}}" STREQUAL "")
+            set(_pp_ndk_root "$ENV{${_pp_var}}")
+            break()
+        endif()
+    endforeach()
+    if (NOT _pp_ndk_root AND DEFINED ENV{ANDROID_HOME} AND NOT "$ENV{ANDROID_HOME}" STREQUAL "")
+        # Homebrew android-commandlinetools layout: $ANDROID_HOME/ndk/<version>.
+        # Pick the highest version (lexicographic sort works for X.Y.Z dot
+        # version strings produced by the Android SDK manager).
+        file(GLOB _pp_ndk_candidates LIST_DIRECTORIES true "$ENV{ANDROID_HOME}/ndk/*")
+        if (_pp_ndk_candidates)
+            list(SORT _pp_ndk_candidates)
+            list(REVERSE _pp_ndk_candidates)
+            list(GET _pp_ndk_candidates 0 _pp_ndk_root)
+        endif()
+    endif()
+
+    if (_pp_ndk_root AND IS_DIRECTORY "${_pp_ndk_root}")
+        file(GLOB _pp_glslc_candidates "${_pp_ndk_root}/shader-tools/*/glslc")
+        if (_pp_glslc_candidates)
+            list(GET _pp_glslc_candidates 0 _pp_glslc)
+            message(STATUS "parakeet-cpp: using NDK-bundled glslc at ${_pp_glslc}")
+            list(APPEND _pp_extra_cmake_options "-DVulkan_GLSLC_EXECUTABLE=${_pp_glslc}")
+        else()
+            message(FATAL_ERROR
+                "parakeet-cpp: GGML_VULKAN=ON on Android but no glslc found under "
+                "${_pp_ndk_root}/shader-tools/. Install a recent Android NDK "
+                "(>= r25, ships shader-tools/<host>/glslc) or install the "
+                "LunarG Vulkan SDK and set VULKAN_SDK on the host.")
+        endif()
+    else()
+        message(FATAL_ERROR
+            "parakeet-cpp: GGML_VULKAN=ON on Android but couldn't locate the "
+            "Android NDK to find glslc. Set ANDROID_NDK_HOME (or ANDROID_NDK / "
+            "ANDROID_NDK_ROOT) to your NDK path, or set ANDROID_HOME so that "
+            "ANDROID_HOME/ndk/<version> resolves.")
+    endif()
+endif()
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     DISABLE_PARALLEL_CONFIGURE
@@ -137,6 +197,7 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        ${_pp_extra_cmake_options}
 )
 
 vcpkg_cmake_install()
