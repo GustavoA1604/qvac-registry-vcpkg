@@ -1,36 +1,31 @@
 # parakeet.cpp vcpkg overlay port
 #
-# Builds the qvac-parakeet.cpp ASR + diarization inference library
+# Builds the parakeet.cpp ASR + diarization inference library
 # (FastConformer encoder shared by CTC / TDT / EOU; Sortformer head;
 # StreamEvent + EnergyVad helpers) with its own bundled ggml.
 #
 # Installed artefacts:
-#   include/qvac-parakeet/...    (public C++ headers; Engine + StreamSession)
+#   include/parakeet/...         (public C++ headers; Engine + StreamSession)
 #   include/ggml*.h              (bundled ggml public headers)
-#   lib/libqvac-parakeet.a       (static library)
+#   lib/libparakeet.a            (static library)
 #   lib/libggml*.a               (static ggml backends)
-#   share/qvac-parakeet-cpp/     (CMake package config)
+#   share/parakeet-cpp/          (CMake package config)
 #   share/ggml/                  (CMake package config for the bundled ggml)
 #
 # Why bundle ggml instead of depending on the system `ggml` overlay port?
-# qvac-parakeet.cpp is pinned to upstream ggml commit 58c38058 (Apr 9
-# 2026). The system `ggml` port is the qvac-ext-ggml fork on the
-# `speech` branch which carries the chatterbox metal-ops patch
+# parakeet.cpp is pinned to upstream ggml commit 58c38058 (Apr 9 2026).
+# The system `ggml` port is the qvac-ext-ggml fork on the `speech`
+# branch which carries the chatterbox metal-ops patch
 # (`mul_mv Q-variant bias/residual fusion`). That fusion empirically
 # breaks the EOU joint-network q8_0 matmul path (the EOU greedy decoder
 # produces 0 tokens; CTC / TDT / Sortformer all keep working). Since
-# qvac-parakeet.cpp's `add_subdirectory(ggml)` branch already does
+# parakeet.cpp's `add_subdirectory(ggml)` branch already does
 # everything the system port does, we just hand it a tarball of upstream
 # ggml at the right pin and let the build use it.
 #
 # Consumers use:
-#   find_package(qvac-parakeet-cpp CONFIG REQUIRED)
-#   target_link_libraries(... PRIVATE qvac-parakeet::qvac-parakeet)
-#
-# Pinned to a single port-version=0; if the upstream needs a fix during
-# the early integration phase we overwrite this same port-version rather
-# than bumping it (per the qvac-registry-vcpkg single-port-version
-# policy for newly-added overlay ports).
+#   find_package(parakeet-cpp CONFIG REQUIRED)
+#   target_link_libraries(... PRIVATE parakeet::parakeet)
 
 # Release-only (no debug build) -- keep it lean. Suppress the
 # "mismatching number of debug and release binaries" check.
@@ -39,15 +34,15 @@ set(VCPKG_BUILD_TYPE release)
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO GustavoA1604/qvac-parakeet.cpp
-    REF 392f775ed53b01fc9a33424ce165229a4dfc29cb
-    SHA512 fb71728574e6c8f12fb6abe87e4d5bf198893957bb2a58ecdd40ece5286ea070e71d8f929b0123b12c13720e0b301897ad9cce503ddf7fa250b71c0471310dc3
+    REPO GustavoA1604/parakeet.cpp
+    REF bc5b3bd378348437e402c7712d08db3d21b915ce
+    SHA512 71ac2db33c997d98751f7b32768f024e0bfed0798e85178d41c427e8d0e8128651cc248eaad79ef3858111efb839e8044fb1718f02ab79c84e544df2c782a7c4
     HEAD_REF main
 )
 
-# Drop the bundled ggml into ${SOURCE_PATH}/ggml/ so qvac-parakeet.cpp's
+# Drop the bundled ggml into ${SOURCE_PATH}/ggml/ so parakeet.cpp's
 # CMakeLists picks it up via add_subdirectory(ggml) in the
-# QVAC_PARAKEET_USE_SYSTEM_GGML=OFF (default) branch. The `parakeet`
+# PARAKEET_USE_SYSTEM_GGML=OFF (default) branch. The `parakeet`
 # branch on GustavoA1604/qvac-ext-ggml is upstream ggml at the pinned
 # commit (58c38058) plus two ggml-opencl patches landed as commits
 # (QVAC-17997):
@@ -235,15 +230,15 @@ vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     DISABLE_PARALLEL_CONFIGURE
     OPTIONS
-        -DQVAC_PARAKEET_BUILD_LIBRARY=ON
-        -DQVAC_PARAKEET_BUILD_EXECUTABLES=OFF
-        -DQVAC_PARAKEET_BUILD_TESTS=OFF
-        -DQVAC_PARAKEET_BUILD_EXAMPLES=OFF
-        -DQVAC_PARAKEET_INSTALL=ON
-        -DQVAC_PARAKEET_USE_SYSTEM_GGML=OFF
+        -DPARAKEET_BUILD_LIBRARY=ON
+        -DPARAKEET_BUILD_EXECUTABLES=OFF
+        -DPARAKEET_BUILD_TESTS=OFF
+        -DPARAKEET_BUILD_EXAMPLES=OFF
+        -DPARAKEET_INSTALL=ON
+        -DPARAKEET_USE_SYSTEM_GGML=OFF
         -DBUILD_SHARED_LIBS=OFF
-        # Disable parakeet.cpp's libqvac-parakeet-ggml-* output prefix in
-        # the vcpkg flow. The prefix is meant to avoid shared-library
+        # Disable parakeet.cpp's libparakeet-ggml-* output prefix in the
+        # vcpkg flow. The prefix is meant to avoid shared-library
         # filename collisions when multiple addons load different ggml
         # versions in the same process; it's a no-op for shared linkage
         # and actively breaks static-link installs because the upstream
@@ -253,7 +248,7 @@ vcpkg_cmake_configure(
         # BUILD_SHARED_LIBS=OFF (everything statically links into the
         # consuming addon's single shared object), the prefix has no
         # collision benefit here.
-        -DQVAC_PARAKEET_GGML_LIB_PREFIX=OFF
+        -DPARAKEET_GGML_LIB_PREFIX=OFF
         # GGML_NATIVE=OFF on every triplet, matching qvac-fabric's port.
         # NATIVE=ON makes ggml-cpu probe the build host's CPU at configure
         # time (-march=native on GCC/Clang, FindSIMD.cmake -> /arch:AVX512
@@ -267,12 +262,12 @@ vcpkg_cmake_configure(
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
         -DGGML_CCACHE=OFF
-        # Disable qvac-parakeet's own ccache launcher in vcpkg builds so
+        # Disable parakeet.cpp's own ccache launcher in vcpkg builds so
         # CI runs are deterministic regardless of whether ccache is on
         # the build image. ggml's own GGML_CCACHE=OFF is already set
         # above; both are needed since the parakeet ccache helper is
         # scoped to parakeet targets only and doesn't read GGML_CCACHE.
-        -DQVAC_PARAKEET_CCACHE=OFF
+        -DPARAKEET_CCACHE=OFF
         -DGGML_BUILD_NUMBER=1
         -DGGML_METAL=${GGML_METAL}
         -DGGML_VULKAN=${GGML_VULKAN}
@@ -283,9 +278,9 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
-# qvac-parakeet.cpp's upstream CMakeLists exports its package config to
-# share/qvac-parakeet-cpp/qvac-parakeet-cppConfig.cmake; the bundled ggml
-# install rules export their own to share/ggml/. No vcpkg_cmake_config_fixup
+# parakeet.cpp's upstream CMakeLists exports its package config to
+# share/parakeet-cpp/parakeet-cppConfig.cmake; the bundled ggml install
+# rules export their own to share/ggml/. No vcpkg_cmake_config_fixup
 # needed for either.
 
 # Strip duplicated include headers + debug shares from the install image.
