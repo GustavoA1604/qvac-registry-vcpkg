@@ -280,6 +280,25 @@ vcpkg_cmake_configure(
         # the same trade-off `qvac-fabric` / `llama-cpp` already make.
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
+        # parakeet.cpp itself also `find_package(OpenMP)`s and links
+        # `target_link_libraries(parakeet PRIVATE OpenMP::OpenMP_CXX)`
+        # behind a top-level `option(PARAKEET_OPENMP ... ON)` (separate
+        # from GGML_OPENMP). With PARAKEET_OPENMP=ON, building this port
+        # for arm64-android on a macOS host that has libomp (homebrew)
+        # finds OpenMP successfully, and -- because libparakeet.a is
+        # STATIC -- the PRIVATE link gets propagated through the
+        # exported targets file as
+        #   INTERFACE_LINK_LIBRARIES "...;$<LINK_ONLY:OpenMP::OpenMP_CXX>;..."
+        # The consumer's `find_package(parakeet-cpp CONFIG REQUIRED)`
+        # then errors at configure time because parakeet-cppConfig.cmake
+        # only `find_dependency(ggml CONFIG)`s, never OpenMP, so the
+        # OpenMP::OpenMP_CXX target doesn't exist when the targets file
+        # tries to set_target_properties. llama.cpp doesn't have an
+        # equivalent top-level OpenMP knob (only ggml does), which is
+        # why the qvac-fabric / llama-cpp ports get away with just
+        # GGML_OPENMP=OFF. Match the same "no OpenMP in the prebuilt
+        # speech-stack ports" stance here.
+        -DPARAKEET_OPENMP=OFF
         -DGGML_CCACHE=OFF
         # Disable parakeet.cpp's own ccache launcher in vcpkg builds so
         # CI runs are deterministic regardless of whether ccache is on
