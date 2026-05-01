@@ -9,8 +9,11 @@
 #   include/ggml*.h              (bundled ggml public headers)
 #   lib/libparakeet.a            (static library)
 #   lib/libggml*.a               (static ggml backends)
-#   share/parakeet-cpp/          (CMake package config)
-#   share/ggml/                  (CMake package config for the bundled ggml)
+#   share/parakeet-cpp/          (parakeet-cpp CMake package config:
+#                                 parakeet-cppConfig.cmake +
+#                                 parakeet-cpp-targets[-release].cmake)
+#   share/ggml/                  (bundled ggml CMake package config:
+#                                 ggml-config.cmake + ggml-targets.cmake)
 #
 # Why bundle ggml instead of depending on the system `ggml` overlay port?
 # parakeet.cpp is pinned to upstream ggml commit 58c38058 (Apr 9 2026).
@@ -35,8 +38,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO GustavoA1604/parakeet.cpp
-    REF bc5b3bd378348437e402c7712d08db3d21b915ce
-    SHA512 71ac2db33c997d98751f7b32768f024e0bfed0798e85178d41c427e8d0e8128651cc248eaad79ef3858111efb839e8044fb1718f02ab79c84e544df2c782a7c4
+    REF 32baa88bd82ddba7877cca47cb528755a02c806a
+    SHA512 6152e3103c9bd3ce3c79196366374e6c2b7d97694dfff95b0aad25cbf35e6562cf9fde1c888ca3be44ee3049e3ccce4b7e3175e575e5ea98a7f7cc2e75930f0f
     HEAD_REF main
 )
 
@@ -54,6 +57,17 @@ vcpkg_from_github(
 # Carries no chatterbox metal-ops patch (lives on the qvac-ext-ggml
 # `speech` branch which would break parakeet's EOU q8_0 joint-network
 # matmul -- see the bundled-ggml rationale above).
+#
+# The third patch parakeet.cpp ships at upstream
+# (patches/ggml-backend-reg-filename-prefix.patch -- teaches the
+# ggml-backend loader to honour a compile-time
+# GGML_BACKEND_DL_PROJECT_PREFIX) is intentionally *not* required on
+# this fork: the macro is only set when PARAKEET_GGML_LIB_PREFIX=ON,
+# and this port hard-pins PARAKEET_GGML_LIB_PREFIX=OFF +
+# BUILD_SHARED_LIBS=OFF (see below) so the loader never enters the
+# prefixed-search code path. Land the patch on this fork only when
+# the port flips the prefix on (it would also become a prerequisite
+# for a future shared-linkage variant of this port).
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SRC
     REPO GustavoA1604/qvac-ext-ggml
@@ -240,14 +254,19 @@ vcpkg_cmake_configure(
         # Disable parakeet.cpp's libparakeet-ggml-* output prefix in the
         # vcpkg flow. The prefix is meant to avoid shared-library
         # filename collisions when multiple addons load different ggml
-        # versions in the same process; it's a no-op for shared linkage
-        # and actively breaks static-link installs because the upstream
-        # ggml-config.cmake exported here does
+        # versions in the same process. With the prefix on, parakeet.cpp
+        # also wires GGML_BACKEND_DL_PROJECT_PREFIX="parakeet-" through
+        # to its ggml/src/ggml-backend-reg.cpp loader (via the bundled
+        # ggml-backend-reg-filename-prefix.patch) so the runtime
+        # discovery walk matches the renamed filenames; the bundled
+        # ggml-config.cmake exported here, however, does
         # `find_library(GGML_LIBRARY ggml ...)` which only matches
-        # `libggml*` filenames. Since this port hard-pins
-        # BUILD_SHARED_LIBS=OFF (everything statically links into the
-        # consuming addon's single shared object), the prefix has no
-        # collision benefit here.
+        # `libggml*` filenames and would silently miss the renamed
+        # static archives at install-side `find_dependency(ggml)` time.
+        # Since this port hard-pins BUILD_SHARED_LIBS=OFF (everything
+        # statically links into the consuming addon's single shared
+        # object), the prefix has no collision benefit here, so OFF
+        # is both correct and the simplest path.
         -DPARAKEET_GGML_LIB_PREFIX=OFF
         # GGML_NATIVE=OFF on every triplet, matching qvac-fabric's port.
         # NATIVE=ON makes ggml-cpu probe the build host's CPU at configure
