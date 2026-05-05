@@ -20,6 +20,10 @@
       "baseline": "2026-01-30",
       "port-version": 6
     },
+    "ggml-speech": {
+      "baseline": "2026-04-09",
+      "port-version": 0
+    },
     "intgemm": {
       "baseline": "1.0.0",
       "port-version": 0
