@@ -45,35 +45,35 @@ vcpkg_from_github(
 
 # Drop the bundled ggml into ${SOURCE_PATH}/ggml/ so parakeet.cpp's
 # CMakeLists picks it up via add_subdirectory(ggml) in the
-# PARAKEET_USE_SYSTEM_GGML=OFF (default) branch. The `parakeet`
-# branch on GustavoA1604/qvac-ext-ggml is upstream ggml at the pinned
-# commit (58c38058) plus two ggml-opencl patches landed as commits
-# (QVAC-17997):
-#   1. opencl: relax Adreno/Intel device whitelist behind
+# PARAKEET_USE_SYSTEM_GGML=OFF (default) branch. The `speech` branch on
+# GustavoA1604/qvac-ext-ggml is upstream ggml at the pinned commit
+# (58c38058) with the consolidated speech-stack patch series:
+#   1. metal: chatterbox ops -- diag_mask_inf kernel, pad_ext lp0..lp3,
+#      conv_transpose_1d simd_sum rewrite, opt-in Q-variant mul_mv +
+#      bias/residual fusion. The fusion is gated behind
+#      GGML_METAL_FUSE_MV_BIAS (default ON for chatterbox) -- this port
+#      passes -DGGML_METAL_FUSE_MV_BIAS=OFF below to compile it out
+#      because it produces wrong results on parakeet's EOU joint-network
+#      q8_0 matmul (zero tokens decoded). The other three metal additions
+#      target ops parakeet never emits, so they coexist for free.
+#   2. opencl: relax Adreno/Intel device whitelist behind
 #      GGML_OPENCL_ALLOW_UNKNOWN_GPU (no-op on Adreno production builds).
-#   2. opencl: persistent kernel binary cache via
+#   3. opencl: persistent kernel binary cache via
 #      clCreateProgramWithBinary; activates the GGML_OPENCL_CACHE_DIR
 #      contract the LLM addon already plumbs.
-# Carries no chatterbox metal-ops patch (lives on the qvac-ext-ggml
-# `speech` branch which would break parakeet's EOU q8_0 joint-network
-# matmul -- see the bundled-ggml rationale above).
-#
-# The third patch parakeet.cpp ships at upstream
-# (patches/ggml-backend-reg-filename-prefix.patch -- teaches the
-# ggml-backend loader to honour a compile-time
-# GGML_BACKEND_DL_PROJECT_PREFIX) is intentionally *not* required on
-# this fork: the macro is only set when PARAKEET_GGML_LIB_PREFIX=ON,
-# and this port hard-pins PARAKEET_GGML_LIB_PREFIX=OFF +
-# BUILD_SHARED_LIBS=OFF (see below) so the loader never enters the
-# prefixed-search code path. Land the patch on this fork only when
-# the port flips the prefix on (it would also become a prerequisite
-# for a future shared-linkage variant of this port).
+#   4. ggml-backend: GGML_BACKEND_DL_PROJECT_PREFIX teaches the loader
+#      to honour a compile-time backend filename prefix; required when
+#      PARAKEET_GGML_LIB_PREFIX=ON renames the bundled backends to
+#      libparakeet-ggml-* to avoid filename collisions with other addons.
+#      Currently inert here because the port hard-pins
+#      PARAKEET_GGML_LIB_PREFIX=OFF + BUILD_SHARED_LIBS=OFF, but kept
+#      so the same source can flip to dynamic backends without a re-pin.
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SRC
     REPO GustavoA1604/qvac-ext-ggml
-    REF 8bca30a34ba06e62fe5406dc122e49d3db0eba3a
-    SHA512 624ba10829dc8b19a785728903b34ded184b715b6182ba936461acb15744ce901e2b8af48356d42b7ec6b823b227f45ecb5810589794528bd4cfe056a57e9faf
-    HEAD_REF parakeet
+    REF 40349fb944a372ed5899500e14ded88a3739d89d
+    SHA512 51286111142170169af17318f75651872b3ab8721499114ca7c3937972b5f4f41f9780837638edf8a66229213f3af811a6e691a5d73dfec1dc68f237f9351ef1
+    HEAD_REF speech
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(RENAME "${GGML_SRC}" "${SOURCE_PATH}/ggml")
@@ -311,6 +311,12 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        # Compile out the chatterbox Q-variant mul_mv + bias/residual
+        # fusion in the bundled ggml-metal backend. See the speech
+        # branch rationale at the top of this portfile -- the fusion
+        # is correct for chatterbox T3 but produces zero tokens on
+        # parakeet's EOU joint-network q8_0 matmul.
+        -DGGML_METAL_FUSE_MV_BIAS=OFF
         ${_pp_extra_cmake_options}
 )
 

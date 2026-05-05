@@ -1,7 +1,7 @@
 {
   "name": "parakeet-cpp",
   "version-date": "2026-04-30",
-  "port-version": 13,
+  "port-version": 14,
   "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella, plus the Phase 13 cross-engine StreamEvent API (VadStateChanged / EndOfTurn).",
   "homepage": "https://github.com/GustavoA1604/parakeet.cpp",
   "license": "MIT",
