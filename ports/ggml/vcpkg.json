@@ -1,8 +1,8 @@
 {
   "name": "ggml",
   "version-date": "2026-01-30",
-  "port-version": 6,
-  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied, pinned to commit used by stable-diffusion.cpp master-514-5792c66)",
+  "port-version": 7,
+  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied; pinned to upstream ggml 58c38058 + the consolidated speech-stack patch series on the speech branch -- chatterbox metal ops with gated mul_mv+bias fusion, opencl Adreno-whitelist relaxation + persistent kernel cache, ggml-backend DL filename-prefix support).",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml",
   "license": "MIT",
   "dependencies": [

@@ -1,9 +1,26 @@
 # ggml vcpkg overlay port
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
-# Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied.  Pinned to the commit used by stable-diffusion.cpp tag
-# master-514-5792c66.
+# Fork of ggml-org/ggml (upstream commit 58c38058 -- llama.cpp sync,
+# Apr 9 2026) with the consolidated speech-stack patch series:
+#   1. metal: chatterbox ops -- diag_mask_inf kernel, pad_ext lp0..lp3,
+#      conv_transpose_1d simd_sum rewrite, and an opt-in Q-variant
+#      mul_mv + ADD(bias) [+ ADD(residual)] fusion. The fusion is gated
+#      behind GGML_METAL_FUSE_MV_BIAS (default ON) -- consumers whose
+#      models hit the EOU q8_0 joint-network pattern (parakeet's EOU
+#      head produces zero tokens under the fusion) pass
+#      -DGGML_METAL_FUSE_MV_BIAS=OFF in their own port to compile it
+#      out. The other three metal additions target ops parakeet never
+#      emits, so they coexist for free.
+#   2. opencl: relax Adreno/Intel device whitelist behind
+#      GGML_OPENCL_ALLOW_UNKNOWN_GPU.
+#   3. opencl: persistent kernel binary cache via
+#      clCreateProgramWithBinary (activates the GGML_OPENCL_CACHE_DIR
+#      contract the LLM addon already plumbs).
+#   4. ggml-backend: GGML_BACKEND_DL_PROJECT_PREFIX teaches the loader
+#      to honour a compile-time backend filename prefix; lets speech-
+#      stack consumers ship libspeech-ggml-*.so alongside e.g. the
+#      qvac-fabric libqvac-ggml-*.so without filename collisions.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -19,9 +36,9 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF e16bdae279d575432337cf8cf375977812fdba9d
-    SHA512 09fa1cd58bdaf0cf77803ef723d15ef98ca4fa529e24d66bd9a9bbff09c34c9ff63a27bb8256d71d2961ee797473f72984a9f942606f3dac9d04b50b4ea11763
-    HEAD_REF 2026-01-30
+    REF 40349fb944a372ed5899500e14ded88a3739d89d
+    SHA512 51286111142170169af17318f75651872b3ab8721499114ca7c3937972b5f4f41f9780837638edf8a66229213f3af811a6e691a5d73dfec1dc68f237f9351ef1
+    HEAD_REF speech
 )
 
 # --- GPU feature flags ---
