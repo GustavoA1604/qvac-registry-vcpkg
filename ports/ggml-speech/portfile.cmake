@@ -4,8 +4,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 4cec2d3a64382eb09eff51fb114eba0f96abf4eb
-    SHA512 54ee88636d8157cab54455c9a9de7b5c0cd327db62e3832016abddb83956743e99b7706d0567058e0484f2705d3fd0588468443e32431b2044e369906918b48f
+    REF de7a55e3eea087bed6484607b518d60a3366acbe
+    SHA512 160588159ca6cbd99ba2ebe0269ed8ae4a0672f6e296bec37cd94d75ea11090bc525211dcbb055239c65d49c5f844f204d68790cbadf5b8b4dae8d564fc52a74
     HEAD_REF speech
 )
 
@@ -74,8 +74,9 @@ if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
 endif()
 
-# Hybrid Android backend mode: GPU backends as MODULE .so loaded via dlopen,
-# CPU statically linked.
+# Hybrid Android backend mode: GPU backends as MODULE .so loaded at runtime
+# via dlopen, CPU statically linked into the consumer's binary. Relies on the
+# `cmake: support qvac hybrid backend packaging` patch on the speech branch.
 if(VCPKG_TARGET_IS_ANDROID)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
@@ -107,6 +108,9 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
+# Pick up the MODULE backend .so files ggml builds into the buildtree's
+# bin/ directory (Android dynamic-backend mode). cmake install() doesn't
+# move them by default.
 if(VCPKG_TARGET_IS_ANDROID)
     file(GLOB _backend_sos
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-speech-ggml-*.so"

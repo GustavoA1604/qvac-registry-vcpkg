@@ -22,7 +22,7 @@
     },
     "ggml-speech": {
       "baseline": "2026-04-09",
-      "port-version": 0
+      "port-version": 1
     },
     "intgemm": {
       "baseline": "1.0.0",
@@ -54,7 +54,7 @@
     },
     "parakeet-cpp": {
       "baseline": "2026-05-05",
-      "port-version": 0
+      "port-version": 1
     },
     "protobuf": {
       "baseline": "onnxruntime",
@@ -103,6 +103,10 @@
     "tokenizers-cpp": {
       "baseline": "0.1.1",
       "port-version": 2
+    },
+    "tts-cpp": {
+      "baseline": "2026-05-07",
+      "port-version": 0
     },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",

@@ -1,5 +1,5 @@
-# parakeet-cpp: NVIDIA Parakeet ASR + Sortformer diarization in pure C++/ggml.
-# Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
+# tts-cpp: Resemble Chatterbox + Supertonic TTS in pure C++/ggml.
+# Sourced from the tts-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
@@ -13,10 +13,10 @@ vcpkg_from_github(
     HEAD_REF master
 )
 
-set(SOURCE_PATH "${WHISPER_CPP_SRC}/parakeet-cpp")
+set(SOURCE_PATH "${WHISPER_CPP_SRC}/tts-cpp")
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
-        "parakeet-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the parakeet-cpp/ "
+        "tts-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the tts-cpp/ "
         "subfolder layout in qvac-ext-lib-whisper.cpp may have changed.")
 endif()
 
@@ -41,18 +41,18 @@ vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     DISABLE_PARALLEL_CONFIGURE
     OPTIONS
-        -DPARAKEET_BUILD_LIBRARY=ON
-        -DPARAKEET_BUILD_EXECUTABLES=OFF
-        -DPARAKEET_BUILD_TESTS=OFF
-        -DPARAKEET_BUILD_EXAMPLES=OFF
-        -DPARAKEET_INSTALL=ON
-        -DPARAKEET_USE_SYSTEM_GGML=ON
+        -DTTS_CPP_BUILD_LIBRARY=ON
+        -DTTS_CPP_BUILD_SHARED=OFF
+        -DTTS_CPP_BUILD_EXECUTABLES=OFF
+        -DTTS_CPP_BUILD_TESTS=OFF
+        -DTTS_CPP_INSTALL=ON
+        -DTTS_CPP_USE_SYSTEM_GGML=ON
         -DBUILD_SHARED_LIBS=OFF
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
-        -DPARAKEET_OPENMP=OFF
+        -DTTS_CPP_OPENMP=OFF
         -DGGML_CCACHE=OFF
-        -DPARAKEET_CCACHE=OFF
+        -DTTS_CPP_CCACHE=OFF
         -DGGML_METAL=${GGML_METAL}
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
@@ -61,7 +61,7 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
-vcpkg_cmake_config_fixup(PACKAGE_NAME parakeet-cpp CONFIG_PATH share/parakeet-cpp)
+vcpkg_cmake_config_fixup(PACKAGE_NAME tts-cpp CONFIG_PATH share/tts-cpp)
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")

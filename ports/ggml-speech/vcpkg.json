@@ -1,6 +1,7 @@
 {
   "name": "ggml-speech",
   "version-date": "2026-04-09",
+  "port-version": 1,
   "description": "Speech-stack flavour of ggml from tetherto/qvac-ext-ggml@speech. Library filenames are prefixed libqvac-speech-ggml-* so they coexist with libqvac-ggml-* (fabric/llm) and libqvac-diffusion-ggml-* on the same Android device. Mutually exclusive with the regular ggml port in the same triplet -- pick one per build.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
