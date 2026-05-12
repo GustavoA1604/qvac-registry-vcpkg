@@ -122,7 +122,7 @@
     },
     "whisper-cpp": {
       "baseline": "1.8.4.2",
-      "port-version": 0
+      "port-version": 1
     },
     "xnnpack": {
       "baseline": "onnxruntime",

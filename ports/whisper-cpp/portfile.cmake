@@ -36,8 +36,17 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
-if (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
+if (VCPKG_TARGET_IS_OSX)
   list(APPEND PLATFORM_OPTIONS -DGGML_METAL=ON)
+elseif (VCPKG_TARGET_IS_IOS)
+  # Intentionally NOT -DGGML_METAL=ON. iOS bare-kit builds were hitting
+  # a separate Metal/Compiler XPC crash during transcribe() on physical
+  # iPhone (XPC_ERROR_CONNECTION_INTERRUPTED / MTLCompiler peer-unloaded)
+  # that is being investigated independently of the OutputCallBackJs
+  # teardown UAF. Force the flag OFF so it overrides any upstream default
+  # and stays explicit in the build log; iOS falls back to the CPU
+  # backend until the Metal-side issue is fixed.
+  list(APPEND PLATFORM_OPTIONS -DGGML_METAL=OFF)
 elseif("vulkan" IN_LIST FEATURES)
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
 else()
