@@ -1,5 +1,5 @@
 set(QVAC_REPO "https://github.com/tetherto/qvac.git")
-set(QVAC_REF "ce2ea933bb7e398e337529e527638d6595f0ceb4")
+set(QVAC_REF "08d695772fe2944dc5adad0067c1d4e105ffdc90")
 set(QVAC_LINT_CPP_SUBDIR "packages/lint-cpp")
 
 vcpkg_from_git(
